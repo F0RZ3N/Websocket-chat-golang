@@ -1,20 +1,27 @@
 package main
 
 import (
+	"encoding/json/v2"
 	"fmt"
+	"time"
 )
 
-type hub struct {
+type Room struct {
+	msgHistory []Message
 	clients    map[*Client]bool
-	broadcast  chan []byte
+}
+
+type hub struct {
+	rooms      map[string]*Room
+	broadcast  chan Broadcast
 	register   chan *Client
 	unregister chan *Client
 }
 
 func newHub() *hub {
 	h := &hub{
-		clients:    make(map[*Client]bool),
-		broadcast:  make(chan []byte, 256),
+		rooms:      make(map[string]*Room),
+		broadcast:  make(chan Broadcast, 256),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 	}
@@ -25,16 +32,69 @@ func (h *hub) Run() {
 	fmt.Println("Hub running..\n")
 	for {
 		select {
+
 		case regClient := <-h.register:
-			h.clients[regClient] = true
+			room, ok := h.rooms[regClient.roomID]
+			if !ok {
+				room = &Room{
+					clients: make(map[*Client]bool),
+				}
+				h.rooms[regClient.roomID] = room
+			}
+			room.clients[regClient] = true
+
+			for _, message := range h.rooms[regClient.roomID].msgHistory {
+				jsonMsg, err := json.Marshal(message)
+				if err != nil {
+					fmt.Println("JSON parse error: ", err)
+				}
+				regClient.send <- jsonMsg
+			}
+
+			msg := &Message{
+				Type:      "notification",
+				Username:  regClient.username,
+				Text:      fmt.Sprintln("User", regClient.username, "has joined the room"),
+				Timestamp: time.Now(),
+			}
+
+			jsonMsg, err := json.Marshal(msg)
+			if err != nil {
+				fmt.Println("JSON parse error: ", err)
+			}
+
+			castJoined := &Broadcast{
+				roomID: regClient.roomID,
+				data:   jsonMsg,
+				msg:    msg,
+			}
+			h.broadcast <- *castJoined
+
 		case unregClient := <-h.unregister:
-			if _, here := h.clients[unregClient]; here {
-				delete(h.clients, unregClient)
+			room, ok := h.rooms[unregClient.roomID]
+			if !ok {
+				continue
+			}
+			if _, here := room.clients[unregClient]; here {
+				delete(room.clients, unregClient)
 				close(unregClient.send)
 			}
+			if len(room.clients) == 0 {
+				delete(h.rooms, unregClient.roomID)
+			}
+
 		case gotBroadcast := <-h.broadcast:
-			for client := range h.clients {
-				client.send <- gotBroadcast
+			room, ok := h.rooms[gotBroadcast.roomID]
+			if !ok {
+				continue
+			}
+			for client := range room.clients {
+				client.send <- gotBroadcast.data
+			}
+			if len(room.msgHistory) >= 50 {
+				room.msgHistory = append(room.msgHistory[1:], *gotBroadcast.msg)
+			} else {
+				room.msgHistory = append(room.msgHistory, *gotBroadcast.msg)
 			}
 		}
 	}

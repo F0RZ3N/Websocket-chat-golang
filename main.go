@@ -12,6 +12,11 @@ var upgrader = websocket.Upgrader{
 }
 
 func (h *hub) baseHandler(w http.ResponseWriter, r *http.Request) { //http handler
+	if r.PathValue("roomID") == "" || r.URL.Query().Get("username") == "" {
+		w.WriteHeader(400)
+		return
+	}
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 
 	if err != nil {
@@ -20,8 +25,10 @@ func (h *hub) baseHandler(w http.ResponseWriter, r *http.Request) { //http handl
 	}
 
 	cl := &Client{
-		conn: conn,
-		send: make(chan []byte, 256),
+		roomID:   r.PathValue("roomID"),
+		username: r.URL.Query().Get("username"),
+		conn:     conn,
+		send:     make(chan []byte, 256),
 	}
 
 	h.register <- cl
@@ -35,7 +42,7 @@ func main() {
 	Hub := newHub() //start hub
 	go Hub.Run()
 
-	http.HandleFunc("/ws", Hub.baseHandler) //handle net
+	http.HandleFunc("/ws/{roomID}", Hub.baseHandler) //handle net
 
 	err := http.ListenAndServe(":8080", nil)
 
