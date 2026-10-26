@@ -1,0 +1,57 @@
+/* Растягиваем страницу на всю высоту экрана и убираем лишние отступы */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+/* Делаем body flex-контейнером, чтобы main тоже мог растягиваться */
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Стили для шапки (по желанию) */
+header {
+    background-color: #f1f1f1;
+    padding: 10px;
+    text-align: center;
+}
+
+/* Главный контейнер занимает ВСЁ оставшееся пространство */
+main {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;         /* Заставляет main занять всю свободную высоту */
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;     /* Чтобы страница целиком не скроллилась */
+}
+
+/* Блок с сообщениями — устремляется вниз */
+#messages {
+    flex-grow: 1;         /* Занимает максимум места, выталкивая инпуты вниз */
+    background-color: #fafafa;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding: 15px;
+
+    /* Добавляем внутренний скролл, если сообщений станет слишком много */
+    overflow-y: auto;
+}
+
+/* Стили для поля ввода и кнопки (чтобы они были в одну строку) */
+#input {
+    padding: 10px;
+    font-size: 16px;
+    flex-grow: 1;
+}
+
+#send {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Пример простой обертки для инпута и кнопки, если захотите сгруппировать */
+/* (В вашем HTML они идут подряд, поэтому можно оставить так) */
