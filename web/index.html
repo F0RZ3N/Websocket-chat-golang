@@ -3,21 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Websocket chat</title>
+    <title>Websocket Chat</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://googleapis.com" rel="stylesheet">
 </head>
 <body>
 
-    <header>
-        <h1>Websocket chat example frontend in golang</h1>
-    </header>
+    <div class="chat-container">
+        <header class="chat-header">
+            <div class="header-info">
+                <div class="status-online"></div>
+                <h1>Go WebSocket Chat</h1>
+            </div>
+            <span class="subtitle">Пример фронтенда</span>
+        </header>
 
-    <main>
-        <div id="messages"></div>
-        <input id =input type="text">
-        <button id="send">Отправить</button>
-    </main>
+        <main class="chat-main">
+            <div id="messages">
+                <div class="message incoming">
+                    <div class="message-text"></div>
+                </div>
+                <div class="message outgoing">
+                    <div class="message-text"></div>
+                </div>
+            </div>
+            <div class="input-area">
+                <input id="input" type="text" placeholder="Напишите сообщение..." autocomplete="off">
+                <button id="send">
+                    <span>Отправить</span>
+                </button>
+            </div>
+        </main>
+    </div>
 
     <script src="app.js"></script>
-    <link rel="stylesheet" href="style.css">
 </body>
 </html>

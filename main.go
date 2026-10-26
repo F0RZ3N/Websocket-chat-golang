@@ -38,17 +38,15 @@ func (h *hub) baseHandler(w http.ResponseWriter, r *http.Request) { //http handl
 
 }
 
-func handleStatic(w http.ResponseWriter, r *http.Request) {
-	http.FileServer(http.Dir("web")).ServeHTTP(w, r)
-}
-
 func main() {
 	mux := http.NewServeMux()
 	Hub := newHub() //start hub
 	go Hub.Run()
 
 	mux.HandleFunc("/ws/{roomID}", Hub.baseHandler) // handle websocket
-	mux.HandleFunc("/", handleStatic)
+
+	fileServer := http.FileServer(http.Dir("web"))
+	mux.Handle("/", fileServer) // handle static
 
 	fmt.Println("Сервер запущен на :8080...")
 	if err := http.ListenAndServe(":8080", mux); err != nil {

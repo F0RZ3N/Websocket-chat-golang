@@ -52,7 +52,7 @@ func (h *hub) Run() {
 			}
 
 			msg := &Message{
-				Type:      "notification",
+				Type:      "system",
 				Username:  regClient.username,
 				Text:      fmt.Sprintln("User", regClient.username, "has joined the room"),
 				Timestamp: time.Now(),

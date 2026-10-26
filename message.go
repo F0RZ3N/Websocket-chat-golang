@@ -3,7 +3,7 @@ package main
 import "time"
 
 type Message struct {
-	Type      string    `json:"type"` // msg|system
+	Type      string    `json:"type"` // message|notification
 	Username  string    `json:"username"`
 	Text      string    `json:"text"`
 	Timestamp time.Time `json:"timestamp"`
