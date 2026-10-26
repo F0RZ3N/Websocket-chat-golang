@@ -90,7 +90,7 @@ if (!room || !username) {
         addMessage(`Подключено к комнате «${room}». Вы вошли как ${username}.`, 'system');
     };
 
-3
+    ws.onmessage = (event) => {
         let data;
         try {
             data = JSON.parse(event.data);
